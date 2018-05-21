@@ -89,7 +89,6 @@
 		public function getPlayerY():Number {
 			return char.getPlayerY();
 		}
-
 	}
 	
 }
