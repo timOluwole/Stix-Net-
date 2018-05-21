@@ -55,6 +55,7 @@
 		public function setLeftKeyState(down):void {
 			lKeyDown = down;
 		}
+		
 			
 		public function setRightKeyState(down):void {
 			rKeyDown = down;
