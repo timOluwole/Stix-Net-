@@ -26,8 +26,8 @@
 		private var ng:NetGroup;
 		
 		//If you're gonna use Adobe's Cirrus server make sure you supply your developer key!
-		// public function NetGrouper( ConnectionType:String = NetGrouper.LOCAL_CONNECTION, GroupID:String = null, MulticastIP:String = "239.0.0.255:30304", DeveloperKey:String = "65c1b8088f7d149e66713918-502ba8373649" ):void {
-		public function NetGrouper( ConnectionType:String = NetGrouper.CIRRUS_CONNECTION, GroupID:String = null, MulticastIP:String = "239.0.0.255:30304", DeveloperKey:String = "65c1b8088f7d149e66713918-502ba8373649" ):void {	
+		// public function NetGrouper( ConnectionType:String = NetGrouper.LOCAL_CONNECTION, GroupID:String = null, MulticastIP:String = "239.0.0.255:30304", DeveloperKey:String = " CIRRUS DEV KEY " ):void {
+		public function NetGrouper( ConnectionType:String = NetGrouper.CIRRUS_CONNECTION, GroupID:String = null, MulticastIP:String = "239.0.0.255:30304", DeveloperKey:String = " CIRRUS DEV KEY " ):void {	
 			_connected = false;
 			if( GroupID != null ) {
 				connect( ConnectionType, GroupID, MulticastIP, DeveloperKey );
@@ -35,8 +35,8 @@
 			
 		}
 		
-		// public function connect( ConnectionType:String = NetGrouper.LOCAL_CONNECTION, GroupID:String = null, MulticastIP:String = "239.0.0.255:4096", DeveloperKey:String = "65c1b8088f7d149e66713918-502ba8373649" ):void {
-		public function connect( ConnectionType:String = NetGrouper.CIRRUS_CONNECTION, GroupID:String = null, MulticastIP:String = "239.0.0.255:4096", DeveloperKey:String = "65c1b8088f7d149e66713918-502ba8373649" ):void {
+		// public function connect( ConnectionType:String = NetGrouper.LOCAL_CONNECTION, GroupID:String = null, MulticastIP:String = "239.0.0.255:4096", DeveloperKey:String = " CIRRUS DEV KEY " ):void {
+		public function connect( ConnectionType:String = NetGrouper.CIRRUS_CONNECTION, GroupID:String = null, MulticastIP:String = "239.0.0.255:4096", DeveloperKey:String = " CIRRUS DEV KEY " ):void {
 			_connectionType = ConnectionType;
 			if( GroupID ) {
 				_gid = GroupID;
