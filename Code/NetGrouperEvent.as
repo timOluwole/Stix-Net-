@@ -19,12 +19,12 @@
 		}
 		
 		public override function clone():Event {
-            return new NetGrouperEvent(type, this.message, bubbles, cancelable);
-        }
+        	    return new NetGrouperEvent(type, this.message, bubbles, cancelable);
+        	}
        
-        public override function toString():String {
-            return formatToString("NetGrouperEvent", "message", "type", "bubbles", "cancelable");
-        }
+		public override function toString():String {
+		    return formatToString("NetGrouperEvent", "message", "type", "bubbles", "cancelable");
+		}
 
 
 	}
