@@ -120,6 +120,5 @@
 			//for real life you might want to post an update based on a timer or something a bit
 			//slower than mouse move or enter frame.
 		}
-	}
-	
+	}	
 }
