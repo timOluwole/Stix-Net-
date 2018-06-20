@@ -1,17 +1,26 @@
-﻿package  {
+package  {
 	import flash.events.*;
+	import flash.utils.*;
 	import flash.filters.BlurFilter; 
+	import flash.display.MovieClip;
 	
 	public class CharController {
 		
-		public var unit:red_default;
+		public var unit;
 		
-		private var lKeyDown:Boolean = false;
-		private var rKeyDown:Boolean = false;
-		private var uKeyDown:Boolean = false;
-		private var dKeyDown:Boolean = false;
+		private var lInput:Boolean = false;
+		private var rInput:Boolean = false;
+		private var uInput:Boolean = false;
+		private var dInput:Boolean = false;
 		
-		private var guardKeyDown:Boolean = false;
+		private var ability1Input:Boolean = false;
+		
+		private var guardInput:Boolean = false;
+		
+		private var punchInput:Boolean = false;
+		private var punchTimer:Number = 0;
+		
+		private var attackList:Array = ["P", "PP", "PPP", "PPP-P"];
 		
 		private var dashEnabled:Boolean = false;
 		private var dashDirection:String;
@@ -23,56 +32,71 @@
 		
 		private var gameFPS:Number;
 
-		public function CharController(game) {
-			groundLevel = game.stage.stageHeight;
+		public function CharController(gameStage) {
 			// constructor code
+			groundLevel = gameStage.stageHeight;
 			unit = new red_default();
 			unit.x = 275;			
 			unit.y = groundLevel;
-			game.addChild(unit);
+			gameStage.addChild(unit);
 			
-			gameFPS = game.stage.frameRate;
+			gameFPS = gameStage.frameRate;
 			
-			game.addEventListener(Event.ENTER_FRAME, update_function(game));
-			
+			gameStage.addEventListener(Event.ENTER_FRAME, update_function(gameStage));
 		}
 		
 		
-		private function update_function(g):Function {
+		public function update_function(gameStage):Function {
 			return function(E:Event):void {
-				g.addEventListener(Event.ENTER_FRAME, frame_by_frame);
+				gameStage.addEventListener(Event.ENTER_FRAME, frame_by_frame);
 			};
 		}
 		
 		
-		private function frame_by_frame(F:Event):void {
+		public function frame_by_frame(F:Event):void {
+			// trace(unit.currentLabel, unit.x, unit.y, lInput, rInput, uInput, dInput);
 			playerMovement();
 			playerPhysics();
 		}
 			
 		// KEY STATES ================================================
 		
-		public function setLeftKeyState(down):void {
-			lKeyDown = down;
-		}
-		
-			
-		public function setRightKeyState(down):void {
-			rKeyDown = down;
+		public function setLeftInput(down):void {
+			lInput = down;
 		}
 			
-		public function setUpKeyState(down):void {
-			uKeyDown = down;
+		public function setRightInput(down):void {
+			rInput = down;
 		}
 			
-		public function setDownKeyState(down):void {
-			dKeyDown = down;
+		public function setUpInput(down):void {
+			uInput = down;
+		}
+			
+		public function setDownInput(down):void {
+			dInput = down;
 		}
 		
-		public function setGuardKeyState(down):void {
-			guardKeyDown = down;
+		public function setGuardInput(down):void {
+			guardInput = down;
 		}
 		
+		public function setAbility1Input(down):void {
+			ability1Input = down;
+		}
+		
+		public function setPunchInput(down):void {
+			if (punchInput != down && down) {
+				punchTimer = getTimer();
+			}
+			punchInput = down;
+			// trace(getTimer() - punchTimer);
+			if ((getTimer() - punchTimer) < 80) {
+				punchInputFired();
+			} else {
+				punchInputHeld();
+			}
+		}
 		// ============================================================
 		
 		public function getGrounded():Boolean {
@@ -110,11 +134,13 @@
 				crouchFrames();
 			} else if (unit.currentLabel.indexOf("guard") == 0) {
 				guardFrames();
+			} else if (unit.currentLabel.match("[P|K|u|d|f|b|-]+")) {
+				attackFrames();
 			}
 		}
 		
 		private function standingFrames():void {
-			if (lKeyDown) {
+			if (lInput) {
 				if (dashEnabled) {
 					if (unit.scaleX < 0) {
 						unit.gotoAndPlay("dash forwards");	
@@ -130,7 +156,7 @@
 						moveCharacterX(-3);	
 					}
 				}
-			} else if (rKeyDown) {
+			} else if (rInput) {
 				if (dashEnabled) {
 					if (unit.scaleX > 0) {
 						unit.gotoAndPlay("dash forwards");	
@@ -147,22 +173,20 @@
 					}				
 				}
 			}
-			if (uKeyDown) {
+			if (uInput) {
 				unit.gotoAndPlay("air");
-			} else if (dKeyDown) {
+			} else if (dInput) {
 				unit.gotoAndPlay("crouch");				
 			}
-			if (guardKeyDown) {
+			if (guardInput) {
 				unit.gotoAndPlay("guard standing");
-				while (unit.previousState != "standing") {
-					unit.gotoAndPlay(unit.currentFrame + 1);
-				}				
+				finder("previous state", "standing");
 			}
 		}
 		
 		private function walkingFrames():void {
-			if (lKeyDown || rKeyDown) {
-				if ((lKeyDown && unit.scaleX < 0) || (rKeyDown && unit.scaleX > 0)) {
+			if (lInput || rInput) {
+				if ((lInput && unit.scaleX < 0) || (rInput && unit.scaleX > 0)) {
 					if (unit.currentLabel != "walking forwards") { 
 						unit.gotoAndPlay("walking forwards");
 					}
@@ -179,17 +203,18 @@
 			} else {			
 				unit.gotoAndPlay("standing");					
 			}
-			if (uKeyDown) {
+			if (uInput) {
 				unit.gotoAndPlay("air");
 				moveCharacterY(fallSpeed);
-			} else if (dKeyDown) {
+			} else if (dInput) {
 				unit.gotoAndPlay("crouch");				
 			}
-			if (guardKeyDown) {
+			if (guardInput) {
 				unit.gotoAndPlay("guard standing");
-				while (unit.previousState != "standing") {
-					unit.gotoAndPlay(unit.currentFrame + 1);
-				}				
+				finder("previous state", "standing");
+			}
+			if (ability1Input) {
+				unit.gotoAndPlay("fire sphere");
 			}
 		}
 		
@@ -207,9 +232,9 @@
 						}
 					}
 				}
-				if (lKeyDown || rKeyDown) {
+				if (lInput || rInput) {
 					var airSpeed;
-					if ((lKeyDown && playerDirection() == -1) || (rKeyDown && playerDirection() == 1)) {
+					if ((lInput && playerDirection() == -1) || (rInput && playerDirection() == 1)) {
 						airSpeed = 5;
 					} else {
 						airSpeed = -3;
@@ -220,11 +245,9 @@
 				if (unit.moveStage == "jumping") {
 					moveCharacterY(fallSpeed);
 				} else if (unit.moveStage == "reset") {
-					if (dKeyDown) {
-						unit.gotoAndPlay("crouch");	
-						while (unit.moveStage != "crouch") {
-							unit.gotoAndPlay(unit.currentFrame + 1);
-						}
+					if (dInput) {
+						unit.gotoAndPlay("crouch");
+						finder("move stage", "crouch");
 					}
 				}
 			}
@@ -243,13 +266,11 @@
 		
 		private function crouchFrames():void {
 			if (unit.moveStage == "crouch") {
-				if (dKeyDown) {
+				if (dInput) {
 					unit.stop();
-					if (guardKeyDown) {
+					if (guardInput) {
 						unit.gotoAndPlay("guard crouching");
-						while (unit.previousState != "crouch") {
-							unit.gotoAndPlay(unit.currentFrame + 1);
-						}				
+						finder("previous state", "crouch");
 					}
 				} else {
 					unit.play();
@@ -261,29 +282,56 @@
 		
 		private function guardFrames():void {
 			if (unit.moveStage == "guard") {
-				if (guardKeyDown) {
+				if (guardInput) {
 					unit.stop();
-					if (dKeyDown) {
+					if (dInput) {
 						if (unit.currentLabel == "guard standing") {
 							unit.gotoAndPlay("guard crouching");
-							while (unit.previousState != "guard standing") {
-								unit.gotoAndPlay(unit.currentFrame + 1);
-							}
+							finder("previous state", "guard standing");
 						} else if (unit.currentLabel == "guard crouching") {
 							
 						}
 					} else {
 						if (unit.currentLabel == "guard crouching") {
 							unit.gotoAndPlay("guard standing");
-							while (unit.previousState != "guard crouching") {
-								unit.gotoAndPlay(unit.currentFrame + 1);
-							}
+							finder("previous state", "guard crouching");
 						}
 					}
 				} else {
 					unit.play();
-					while (unit.moveStage != "reset") {
-						unit.gotoAndPlay(unit.currentFrame + 1);
+					finder("move stage", "reset");
+				}
+			}
+		}
+		
+		private function attackFrames():void {
+			if (unit.movementX != 0) {
+				moveCharacterX(unit.movementX);
+			}
+			if (unit.movementY != 0) {
+				moveCharacterY(unit.movementY);			
+			}
+		}
+		
+		public function punchInputFired():void {
+			if (unit.currentLabel == "standing" || unit.currentLabel == "walking") {
+				unit.gotoAndPlay("P");
+			} else if (unit.currentLabel.match("[P|K|u|d|f|b|-]+")) {
+				if (unit.moveStage == "window") {
+					var newAttack = unit.currentLabel + "P";
+					if (attackList.indexOf(newAttack) != -1) {
+						unit.gotoAndPlay(newAttack);
+					}
+				}
+			}
+		}
+		
+		public function punchInputHeld():void {
+			if (unit.currentLabel.match("[P|K|u|d|f|b|-]+")) {
+				if (unit.moveStage == "window") {
+					var newAttack = unit.currentLabel + "-P";
+					if (attackList.indexOf(newAttack) != -1) {
+						unit.gotoAndPlay(newAttack);
 					}
 				}
 			}
@@ -319,12 +367,28 @@
 			return (frameCount / gameFPS);
 		}
 		
+		private function finder(unitTag, tagValue):void {
+			if (unitTag == "previous state") {
+				while (unit.previousState != tagValue) {
+					unit.gotoAndPlay(unit.currentFrame + 1);
+				}
+			} else if (unitTag == "move stage") {
+				while (unit.moveStage != tagValue) {
+					unit.gotoAndPlay(unit.currentFrame + 1);
+				}				
+			}
+		}
+		
 		public function getPlayerX():Number {
 			return unit.x;
 		}
 		
 		public function getPlayerY():Number {
 			return unit.y;
+		}
+		
+		public function getPlayerUnit():MovieClip {
+			return unit;
 		}
 	}		
 }
