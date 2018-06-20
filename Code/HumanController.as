@@ -1,6 +1,7 @@
-﻿package  {
+package  {
 	import flash.events.*;
 	import flash.utils.*;
+	import flash.display.MovieClip;
 	
 	public class HumanController {
 		
@@ -10,67 +11,83 @@
 		private var lastPressed:int = 0;
 		private var upTime:Number;
 		
-		public function HumanController(char_controller, game) {
+		private var tapTimeMS:int = 200;
+		private var punchTime:Number = 0;
+		
+		public function HumanController(char_controller, gameStage) {
 			// constructor code
 			char = char_controller;			
 			unit = char.unit;
 			
-			game.addEventListener(Event.ENTER_FRAME, update_function(game));
+			gameStage.addEventListener(Event.ENTER_FRAME, update_function(gameStage));
 		}
 		
-		
-		private function update_function(game):Function {
+		public function update_function(gameStage):Function {
 			return function(E:Event):void {				
-				game.addEventListener(KeyboardEvent.KEY_UP, keysUp);
-				game.addEventListener(KeyboardEvent.KEY_DOWN, keysDown);
-			};
+				gameStage.addEventListener(KeyboardEvent.KEY_UP, keysUp);
+				gameStage.addEventListener(KeyboardEvent.KEY_DOWN, keysDown);
+			}
 		}
+		
 		
 		private function keysUp(K:KeyboardEvent):void {
 			if (K.keyCode == 37) {
-				char.setLeftKeyState(false);
+				char.setLeftInput(false);
 				lastPressed = K.keyCode;
 				upTime = getTimer();
 			}
 			if (K.keyCode == 39) {
-				char.setRightKeyState(false);
+				char.setRightInput(false);
 				lastPressed = K.keyCode;
 				upTime = getTimer();
 			}
 			if (K.keyCode == 38) {
-				char.setUpKeyState(false);
+				char.setUpInput(false);
 			}
 			if (K.keyCode == 40) {
-				char.setDownKeyState(false);
+				char.setDownInput(false);
 			}
 			if (K.keyCode == 79) { // o - guard
-				char.setGuardKeyState(false);
+				char.setGuardInput(false);
+			}
+			if (K.keyCode == 49) { // number 1 - ability 1 (testing)
+				char.setAbility1Input(false);
+			}
+			if (K.keyCode == 80) { // p - punch
+				char.setPunchInput(false);
 			}
 		}
 		
 		private function keysDown(K:KeyboardEvent):void {
 			if (K.keyCode == 37) {
-				char.setLeftKeyState(true);
-				char.setRightKeyState(false);
+				char.setLeftInput(true);
+				char.setRightInput(false);
 				detectDoubleTap(K.keyCode);
 			}
 			if (K.keyCode == 39) {
-				char.setRightKeyState(true);
-				char.setLeftKeyState(false);
+				char.setRightInput(true);
+				char.setLeftInput(false);
 				detectDoubleTap(K.keyCode);
 			}
 			if (K.keyCode == 38) {
-				char.setUpKeyState(true);
-				char.setDownKeyState(false);
+				char.setUpInput(true);
+				char.setDownInput(false);
 			}
 			if (K.keyCode == 40) {
-				char.setDownKeyState(true);
-				char.setUpKeyState(false);
+				char.setDownInput(true);
+				char.setUpInput(false);
 			}
 			if (K.keyCode == 79) { // o - guard
-				char.setGuardKeyState(true);
+				char.setGuardInput(true);
+			}
+			if (K.keyCode == 49) { // number 1 - ability 1 (testing)
+				char.setAbility1Input(true);
+			}
+			if (K.keyCode == 80) { // p - punch
+				char.setPunchInput(true);
 			}
 		}
+		
 		
 		private function detectDoubleTap(nextPressed):void {
 			if (lastPressed == nextPressed) {
@@ -89,6 +106,11 @@
 		public function getPlayerY():Number {
 			return char.getPlayerY();
 		}
+		
+		public function getPlayerUnit():MovieClip {
+			return char.getPlayerUnit();
+		}
+
 	}
 	
 }
